@@ -8,36 +8,30 @@ Hệ thống tự động đối soát bill chuyển khoản học phí dựa tr
 |---|---|
 | Runtime | Google Apps Script (GAS) |
 | OCR Engine | Google Cloud Vision API (TEXT_DETECTION) |
-| AI Reasoning | Gemini 2.0 Flash (hoặc Pro) |
+| AI Reasoning | Gemini 2.0 Flash |
 | Storage | Google Sheets & Google Drive |
 | Auth | OAuth2 JWT Bearer (Service Account) |
 
 ## CẤU TRÚC CODE & FLOW
-- `BillReconciliation_v2.3.gs`: File duy nhất chứa toàn bộ logic.
+- `Doisoat_ricenow.js`: File chính chứa toàn bộ logic xử lý.
 - **Flow chính:** `processImage()`
-  1. `runCloudVisionOCR()`: Lấy raw text từ ảnh.
-  2. `parseWithGemini()`: AI bóc tách {tên, số tiền} từ raw text.
-  3. `fuzzyMatchStudent()`: Khớp tên tìm được với danh sách học sinh (4 cấp độ).
+  1. `runCloudVisionOCR()`: Lấy raw text từ ảnh qua Cloud Vision.
+  2. `parseWithGemini()`: Gemini bóc tách {tên, số tiền} từ raw text.
+  3. `fuzzyMatchStudent()`: Khớp tên tìm được với danh sách HS (4 cấp độ).
   4. `Ghi Sheet & Di chuyển file`: Cập nhật cột AR và move vào folder `Done/`.
 
 ## CRITICAL CONSTRAINTS ⚠️
 ### Hard constraints
-- ⚠️ **Config Sheet:** Phải có tên là `Cấu hình`.
+- ⚠️ **Config Sheet:** Phải có tên chính xác là `Cấu hình`.
 - ⚠️ **Cột dữ liệu:** Tên HS tại cột D (index 4), Tiền đóng tại cột AR (index 44).
 - ⚠️ **Dòng bắt đầu:** Dữ liệu học sinh bắt đầu từ dòng 3.
-- ⚠️ **Auth:** Cloud Vision yêu cầu Service Account JSON chuẩn (không dùng API Key đơn giản).
-
-### Known gotchas
-- 🐛 `google.script.run` giới hạn payload 50MB. Khi upload nhiều ảnh, hệ thống gọi tuần tự `handleUploadSingle` để tránh crash.
-- 🐛 Tên học sinh trong nội dung bill thường thiếu dấu hoặc sai chính tả -> Fuzzy Match được thiết lập ở ngưỡng 0.7.
+- ⚠️ **Auth:** Yêu cầu Service Account JSON chuẩn dán vào ô B1 sheet Cấu hình.
 
 ## COMMON TASKS
-- **Thêm ngân hàng mới:** Không cần sửa code, Gemini tự động xử lý dựa trên ngữ cảnh prompt.
 - **Thay đổi cột ghi tiền:** Sửa hằng số `AMOUNT_COL` ở đầu file.
-- **Debug lỗi nhận diện:** Chạy hàm `testOCRDebug()` để xem log chi tiết từng bước của pipeline.
-- **Cập nhật danh sách học sinh:** Hệ thống tự động load lại danh sách từ Sheet mỗi khi chạy.
+- **Debug lỗi nhận diện:** Chạy hàm `testOCRDebug()` trong Menu để xem chi tiết pipeline.
+- **Cập nhật danh sách lớp:** Điền Tên sheet và Folder ID vào từ dòng A3 sheet Cấu hình.
 
 ## QUICK REFERENCE
 - **Cấu hình:** Sheet `Cấu hình` (A1: Provider, B1: JSON Key, C1: Model, D1: Gemini Key).
 - **Test kết nối:** Menu `🏦 Đối Soát Bill` -> `🔧 Kiểm tra cấu hình`.
-- **Logs:** Xem trong Apps Script Editor (Execution log).
