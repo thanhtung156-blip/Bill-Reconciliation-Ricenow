@@ -1,0 +1,18 @@
+# Credentials — KHÔNG commit lên GitHub
+credentials.json
+service-account.json
+*.key
+*.pem
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+node_modules/
+*.log
